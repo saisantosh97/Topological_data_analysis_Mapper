@@ -1,0 +1,599 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# MAPPER"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The mapper algorithm is a method of replacing a topological space by a simpler one, known as a simplicial complex, which captures topological and geometric features of the original space. The purpose of doing this is not only to obtain a visualization of high dimensional data sets in 3-D, but also because mathematical properties of simplicial complexes allow for the implementation of algebraic calculations that facilitate the classification of the topological features of the complex, and by extension, of the original topological space."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Mapper Input/Output"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "- Input\n",
+    "    1. Point cloud data, distance metric on point cloud\n",
+    "    2. Function on the point cloud:Filter function/ Lens\n",
+    "- Output\n",
+    "    1. Visualization or Simplicial complex on function-induced clustering\n",
+    "    2. Potential inferencce with statistics and machine learning.\n",
+    "- Parameters\n",
+    "    1. Filter function\n",
+    "    2. Number of intervals \n",
+    "    3. Amount of Interval overlap\n",
+    "    4. Color function"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "For this project we used **Iris flower** dataset, which is a multivariate dataset consist of 150 samples from each of the three species of Iris(Iris setosa, Iris virginica, Iris versicolor). Four features were length and width of sepals and petals in centimeters."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Mapper warning: Could not load the module “fastcluster”.\n",
+      "The module “scipy.cluster.hierarchy“ is used instead, but it will be slower.\n",
+      "The 'cmappertools' module could not be imported.\n",
+      "The 'cmappertools' module could not be imported.\n",
+      "Intrinsic metric is not available.\n",
+      "The 'cmappertools' module could not be imported.\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "<style>\n",
+       "    .container { width:100% !important; }\n",
+       "    .output_scroll {height: 800px !important;}\n",
+       "    </style>"
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "# importing libraries\n",
+    "\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "from sklearn import datasets\n",
+    "import kmapper as km\n",
+    "from kmapper.cover import Cover\n",
+    "import mapper as mapp\n",
+    "import sklearn\n",
+    "from kmapper import jupyter\n",
+    "from sklearn.metrics.pairwise import euclidean_distances"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Loading dataset\n",
+    "\n",
+    "iris = datasets.load_iris()\n",
+    "X = iris.data\n",
+    "y = iris.target"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "- Class_descripition\n",
+    "    - Class 0 = Iris-setosa\n",
+    "    - Class 1 = Iris-versicolor\n",
+    "    - Class 2 = Iris-virginica"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "- Column labels\n",
+    "    - sepal_length\n",
+    "    - sepal_width \n",
+    "    - petal_length\n",
+    "    - petal_width\n",
+    "    "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "KeplerMapper()\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Initialize\n",
+    "# For this entire project we are going to use verbose=2\n",
+    "\n",
+    "mapper = km.KeplerMapper(verbose=2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "..Composing projection pipeline of length 1:\n",
+      "\tProjections: TSNE(angle=0.5, early_exaggeration=12.0, init='random', learning_rate=200.0,\n",
+      "     method='barnes_hut', metric='euclidean', min_grad_norm=1e-07,\n",
+      "     n_components=2, n_iter=1000, n_iter_without_progress=300, perplexity=30.0,\n",
+      "     random_state=None, verbose=0)\n",
+      "\tDistance matrices: euclidean\n",
+      "\tScalers: MinMaxScaler(copy=True, feature_range=(0, 1))\n",
+      "..Projecting on data shaped (150, 4)\n",
+      "Created distance matrix, shape: (150, 150), with distance metric `euclidean`\n",
+      "\n",
+      "..Projecting data using: \n",
+      "\tTSNE(angle=0.5, early_exaggeration=12.0, init='random', learning_rate=200.0,\n",
+      "     method='barnes_hut', metric='euclidean', min_grad_norm=1e-07,\n",
+      "     n_components=2, n_iter=1000, n_iter_without_progress=300, perplexity=30.0,\n",
+      "     random_state=None, verbose=2)\n",
+      "\n",
+      "[t-SNE] Computing 91 nearest neighbors...\n",
+      "[t-SNE] Indexed 150 samples in 0.000s...\n",
+      "[t-SNE] Computed neighbors for 150 samples in 0.052s...\n",
+      "[t-SNE] Computed conditional probabilities for sample 150 / 150\n",
+      "[t-SNE] Mean sigma: 3.416043\n",
+      "[t-SNE] Computed conditional probabilities in 0.010s\n",
+      "[t-SNE] Iteration 50: error = 48.8085098, gradient norm = 0.5599770 (50 iterations in 0.063s)\n",
+      "[t-SNE] Iteration 100: error = 49.8069382, gradient norm = 0.5133244 (50 iterations in 0.040s)\n",
+      "[t-SNE] Iteration 150: error = 48.0510674, gradient norm = 0.5246997 (50 iterations in 0.040s)\n",
+      "[t-SNE] Iteration 200: error = 49.6693230, gradient norm = 0.5444644 (50 iterations in 0.036s)\n",
+      "[t-SNE] Iteration 250: error = 46.9453888, gradient norm = 0.5787833 (50 iterations in 0.032s)\n",
+      "[t-SNE] KL divergence after 250 iterations with early exaggeration: 46.945389\n",
+      "[t-SNE] Iteration 300: error = 0.0800555, gradient norm = 0.0032537 (50 iterations in 0.033s)\n",
+      "[t-SNE] Iteration 350: error = 0.0686195, gradient norm = 0.0003735 (50 iterations in 0.029s)\n",
+      "[t-SNE] Iteration 400: error = 0.0675670, gradient norm = 0.0003398 (50 iterations in 0.035s)\n",
+      "[t-SNE] Iteration 450: error = 0.0664450, gradient norm = 0.0003388 (50 iterations in 0.029s)\n",
+      "[t-SNE] Iteration 500: error = 0.0661060, gradient norm = 0.0002998 (50 iterations in 0.035s)\n",
+      "[t-SNE] Iteration 550: error = 0.0656596, gradient norm = 0.0002864 (50 iterations in 0.031s)\n",
+      "[t-SNE] Iteration 600: error = 0.0649535, gradient norm = 0.0002852 (50 iterations in 0.029s)\n",
+      "[t-SNE] Iteration 650: error = 0.0641044, gradient norm = 0.0003635 (50 iterations in 0.031s)\n",
+      "[t-SNE] Iteration 700: error = 0.0643229, gradient norm = 0.0002446 (50 iterations in 0.035s)\n",
+      "[t-SNE] Iteration 750: error = 0.0638555, gradient norm = 0.0003359 (50 iterations in 0.034s)\n",
+      "[t-SNE] Iteration 800: error = 0.0636647, gradient norm = 0.0002646 (50 iterations in 0.030s)\n",
+      "[t-SNE] Iteration 850: error = 0.0633411, gradient norm = 0.0003568 (50 iterations in 0.034s)\n",
+      "[t-SNE] Iteration 900: error = 0.0630085, gradient norm = 0.0002752 (50 iterations in 0.030s)\n",
+      "[t-SNE] Iteration 950: error = 0.0623588, gradient norm = 0.0003038 (50 iterations in 0.030s)\n",
+      "[t-SNE] Iteration 1000: error = 0.0627382, gradient norm = 0.0002228 (50 iterations in 0.033s)\n",
+      "[t-SNE] KL divergence after 1000 iterations: 0.062738\n",
+      "\n",
+      "..Scaling with: MinMaxScaler(copy=True, feature_range=(0, 1))\n",
+      "\n",
+      "Mapping on data shaped (150, 4) using lens shaped (150, 2)\n",
+      "\n",
+      "Minimal points in hypercube before clustering: 2\n",
+      "Creating 100 hypercubes.\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "Cube_9 is empty.\n",
+      "\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "   > Found 1 clusters.\n",
+      "\n",
+      "\n",
+      "Created 16 edges and 14 nodes in 0:00:00.027020.\n",
+      "Wrote visualization to: Output_1.html\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/Users/saisantosh/opt/anaconda3/lib/python3.7/site-packages/IPython/core/display.py:694: UserWarning: Consider using IPython.display.IFrame instead\n",
+      "  warnings.warn(\"Consider using IPython.display.IFrame instead\")\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "<iframe src=Output_1.html width=100%% height=800 frameBorder=\"0\"></iframe>"
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "## lens\n",
+    "from sklearn.manifold import TSNE\n",
+    "X_projected=mapper.fit_transform(X,projection=TSNE(n_components=2),distance_matrix=\"euclidean\")\n",
+    "\n",
+    "\n",
+    "## Cluster--DBSCAN\n",
+    "\n",
+    "graph = mapper.map(X_projected,X ,clusterer=sklearn.cluster.DBSCAN(eps=3, min_samples=2))\n",
+    "\n",
+    "## Creating a visualization \n",
+    "\n",
+    "html = mapper.visualize(graph,color_function=y,path_html=\"Output_1.html\",title=\"Lens: TSNE, Cluster:DBSCAN\",custom_tooltips=y)\n",
+    "jupyter.display(path_html=\"Output_1.html\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "From the above mapper we can infer that Iris-setosa is away form the Remaining species and other two species are having a relation"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Color Sepectrum to choose attributes form Iris data set"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 1. Sepal_length(min length:Yellow, max length:Violet);Lens: TSNE, Cluster:DBSCAN"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Wrote visualization to: Output_2.html\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/Users/saisantosh/opt/anaconda3/lib/python3.7/site-packages/IPython/core/display.py:694: UserWarning: Consider using IPython.display.IFrame instead\n",
+      "  warnings.warn(\"Consider using IPython.display.IFrame instead\")\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "<iframe src=Output_2.html width=100%% height=800 frameBorder=\"0\"></iframe>"
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "html = mapper.visualize(graph,color_function=X[:,0:1],path_html=\"Output_2.html\",title=\"sepal_length(min length:Yellow, max length:Violet);Lens: TSNE, Cluster:DBSCAN\",custom_tooltips=y)\n",
+    "jupyter.display(path_html=\"Output_2.html\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 2. Sepal_width(min width:Yellow, max width:Violet)Lens: TSNE, Cluster:DBSCAN"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Wrote visualization to: Output_3.html\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/Users/saisantosh/opt/anaconda3/lib/python3.7/site-packages/IPython/core/display.py:694: UserWarning: Consider using IPython.display.IFrame instead\n",
+      "  warnings.warn(\"Consider using IPython.display.IFrame instead\")\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "<iframe src=Output_3.html width=100%% height=800 frameBorder=\"0\"></iframe>"
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "html = mapper.visualize(graph,color_function=X[:,1:2],path_html=\"Output_3.html\",title=\"sepal_width(min width:Yellow, max width:Violet)Lens: TSNE, Cluster:DBSCAN\",custom_tooltips=y,show_tooltips=True)\n",
+    "jupyter.display(path_html=\"Output_3.html\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 3. Petal_length(min length:Yellow, max length:Violet);Lens: TSNE, Cluster:DBSCAN"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Wrote visualization to: Output_4.html\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/Users/saisantosh/opt/anaconda3/lib/python3.7/site-packages/IPython/core/display.py:694: UserWarning: Consider using IPython.display.IFrame instead\n",
+      "  warnings.warn(\"Consider using IPython.display.IFrame instead\")\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "<iframe src=Output_4.html width=100%% height=800 frameBorder=\"0\"></iframe>"
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "html = mapper.visualize(graph,color_function=X[:,2:3],path_html=\"Output_4.html\",title=\"petal_length(min length:Yellow, max length:Violet);Lens: TSNE, Cluster:DBSCAN\",custom_tooltips=y,show_tooltips=True)\n",
+    "jupyter.display(path_html=\"Output_4.html\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 4. Petal_width(min width:Yellow, max width:Violet);Lens: TSNE, Cluster:DBSCAN"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Wrote visualization to: Output_5.html\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/Users/saisantosh/opt/anaconda3/lib/python3.7/site-packages/IPython/core/display.py:694: UserWarning: Consider using IPython.display.IFrame instead\n",
+      "  warnings.warn(\"Consider using IPython.display.IFrame instead\")\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "<iframe src=Output_5.html width=100%% height=800 frameBorder=\"0\"></iframe>"
+      ],
+      "text/plain": [
+       "<IPython.core.display.HTML object>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "html = mapper.visualize(graph,color_function=X[:,3:4],path_html=\"Output_5.html\",title=\"petal_width(min width:Yellow, max width:Violet);Lens: TSNE, Cluster:DBSCAN\",custom_tooltips=y,show_tooltips=True)\n",
+    "jupyter.display(path_html=\"Output_5.html\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "- The attributes Petal length and Petal width are highly corelated to label attributes due to similar pattern of color spectrum is observed.Similary we are able to interpret that Iris-setosa's is having the almost same color spectrum in both of its petal dimension measure.\n",
+    "- In the above color spectrum Iris-setosa is away from other Remaining class labels.\n",
+    "- From the above plots Sepal width can consider as noise as it is different form rest of color spectrum"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Limitations of Mapper"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "- How to choose the stable range of parameters (n_cubes,overlap)\n",
+    "- How to choose the clustering algorithms\n",
+    "- How to choose the filter functions\n",
+    "- Obtain insights with the right color function...  "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Further Work"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "- Better automatic parameter tuning \n",
+    "- Multiple lens mapper\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## References"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "- Kepler documentation: https://kepler-mapper.scikit-tda.org/index.html \n",
+    "- Mapper on Graphs for Relationship Preserving Clustering by Mustafa Hajij, Bei Wang, Paul Rosen\n",
+    "- Evaluating Ayasdi’s Topological Data Analysis For Big Data by Prof. Dr. rer. nat. Stephan Trahasch, Prof. Dott. Ing. Roberto V. Zicari\n",
+    "- Advance data visualization: http://www.sci.utah.edu/~beiwang/teaching/cs6965-spring-2018/Lecture04-Mapper.pdf\n",
+    "- Supplemental S1 Text: Topological data analysis to uncover the shape of immune responses during co-infection by Karin Sasaki1, Dunja Bruder2,3 and Esteban Hernandez-Vargas1,*\n",
+    "- Data Visualization with TDA Mapper: http://homepage.divms.uiowa.edu/~idarcy/COURSES/TDA/SPRING18/3900.html\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.4"
+  },
+  "varInspector": {
+   "cols": {
+    "lenName": 16,
+    "lenType": 16,
+    "lenVar": 40
+   },
+   "kernels_config": {
+    "python": {
+     "delete_cmd_postfix": "",
+     "delete_cmd_prefix": "del ",
+     "library": "var_list.py",
+     "varRefreshCmd": "print(var_dic_list())"
+    },
+    "r": {
+     "delete_cmd_postfix": ") ",
+     "delete_cmd_prefix": "rm(",
+     "library": "var_list.r",
+     "varRefreshCmd": "cat(var_dic_list()) "
+    }
+   },
+   "types_to_exclude": [
+    "module",
+    "function",
+    "builtin_function_or_method",
+    "instance",
+    "_Feature"
+   ],
+   "window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
